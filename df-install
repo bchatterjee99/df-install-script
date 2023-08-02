@@ -1,0 +1,92 @@
+#-*-sh-*-
+
+#
+# required programs
+# -------------------
+#
+# 1. Dwarf Fortress (classic) v0.47.05
+#    FROM: http://www.bay12games.com/dwarves/older_versions.html 
+#    FILE: ./df_47_05_linux.tar.bz2
+#
+# 2. DFHack v0.47.05-r8
+#    FROM: https://github.com/DFHack/dfhack/releases/tag/0.47.05-r8
+#    FILE: ./dfhack-0.47.05-r8-Linux-64bit-gcc-7.tar.bz2
+#
+# 3. TWBT (DFHack plugin) for DFHack v0.47.05-r8
+#    FROM: https://github.com/thurin/df-twbt/releases/tag/0.47.05-r8
+#    FILE: ./twbt-6.xx-linux64-0.47.05-r8.zip
+#
+# 4. Vettlingr Graphics Set 
+#    FROM: http://www.bay12forums.com/smf/index.php?topic=172078.0
+#    FILE: ./Vettlingr.zip
+#    
+#
+# ERRORS
+# ----------
+# 1. libstdc++ error fix:
+#    FROM: https://old.reddit.com/r/dwarffortress/comments/f0rcn6/libstdcso6_cxxabi_138_not_found/
+#
+# 2. Vettlingr graphics bug fix
+#    FROM: http://www.bay12forums.com/smf/index.php?topic=126076.msg8425121;topicseen#msg8425121
+#
+
+# remove earlier instance
+rm -rf df_linux
+rm -rf dfhack
+rm -rf twbt
+rm -rf vettlingr
+
+# re-extract
+tar -xvf df_47_05_linux.tar.bz2
+echo -e "extracted DFv0.47.04\n\n"
+
+# destroy packaged libsdtc++
+mv ./df_linux/libs/libstdc++.so.6 ./df_linux/libs/bak.libstdc++.so.6
+echo -e "removed packaged libstdc++.so.6\n\n"
+
+# install df-hack
+mkdir dfhack
+cp ./dfhack-0.47.05-r8-Linux-64bit-gcc-7.tar.bz2 ./dfhack
+cd ./dfhack
+tar -xvf dfhack-0.47.05-r8-Linux-64bit-gcc-7.tar.bz2
+cd ..
+cp -r ./dfhack/* ./df_linux/
+echo -e "installed dfhack\n\n"
+
+# install twbt
+mkdir twbt
+cp ./twbt-6.xx-linux64-0.47.05-r8.zip ./twbt
+cd ./twbt
+unzip twbt-6.xx-linux64-0.47.05-r8.zip
+cd ..
+cp ./twbt/0.47.05-r8/twbt.plug.so ./df_linux/hack/plugins/
+cp ./twbt/overrides.txt ./df_linux/data/init/
+cp ./twbt/shadows.png ./df_linux/data/art/
+cp ./twbt/transparent1px.png ./df_linux/data/art/
+cp ./twbt/white1px.png ./df_linux/data/art/
+echo -e "installed twbt\n\n"
+
+
+# install vettlingr
+mkdir vettlingr
+cp ./Vettlingr.zip ./vettlingr/
+cd ./vettlingr/
+unzip Vettlingr.zip
+
+sed "57s/.*/file:write(\'[FILE:denzi\/procedual_hfexp.png] \\\n\')/" ./Vettlingr/raw/generate-procedual-graphics.lua > tmp1.lua
+sed "73s/.*/file:write(\'[FILE:denzi\/procedual_divine.png] \\\n\')/" tmp1.lua > ./Vettlingr/raw/generate-procedual-graphics.lua
+rm tmp1.lua
+echo -e "patched generate-procedual-graphics.lua\n\n"
+
+cd ..
+cp -r ./vettlingr/Vettlingr/data/ ./df_linux/
+cp -r ./vettlingr/Vettlingr/raw/ ./df_linux/
+
+# enable sound
+sed "11s/.*]/[SOUND:YES]/" ./df_linux/data/init/init.txt > tmp1.txt
+sed "19s/.*]/[INTRO:YES]/" tmp1.txt > ./df_linux/data/init/init.txt
+rm tmp1.txt
+
+
+
+
